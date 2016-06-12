@@ -1,6 +1,9 @@
 KeySig
 ---
 
+In Linux: https://github.com/MarinX/keylogger
+In Mac: can't keylog (must be active process with Window atm)
+
 Goals
 ---
 
@@ -17,6 +20,7 @@ Ideas for metrics
 2. Stream of events (this could be the base data actually) such as keydown, keyup
 3. Time between different keys. h -> e -> l -> l -> o, etc
 4. Length of line
+5. Wrong spelling
 
 Program structure
 ---

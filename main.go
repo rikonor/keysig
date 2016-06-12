@@ -8,17 +8,8 @@ import (
 func main() {
 	k := keylogger.New()
 
-	metrics.NewCharDiff().RegisterWith(k)
-
-	// // Register all of your typing statistics
-	// evts := make(chan keyboard.ButtonEvent)
-	// go func() {
-	// 	for evt := range evts {
-	// 		fmt.Println("Got something", evt)
-	// 	}
-	// }()
-	//
-	// k.Register("myChan", evts)
+	metrics.NewTimeToNext().RegisterWith(k)
+	metrics.NewTimeOfPress().RegisterWith(k)
 
 	k.Start()
 }
