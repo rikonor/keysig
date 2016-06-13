@@ -12,18 +12,25 @@ func main() {
 	k := keylogger.New()
 
 	ttn := metrics.NewTimeToNext()
-	ttn.RegisterWith(k)
-
 	top := metrics.NewTimeOfPress()
-	top.RegisterWith(k)
+
+	ms := []metrics.Metric{ttn, top}
+	rs := []reports.Reportee{ttn, top}
+
+	for _, m := range ms {
+		m.RegisterWith(k)
+	}
 
 	// Right now azul3d is blocking, therefore we shut off the logger with Ctrl+C
 	// but also after a certain time we can write all our results to a csv file
 	r := reports.New()
 	go func() {
-		// Wait 10 seconds before writing collected data to CSV
+		// Wait a few seconds before writing collected data to CSV
 		time.Sleep(5 * time.Second)
-		r.WriteToCSV(top)
+
+		for _, p := range rs {
+			r.WriteToCSV(p)
+		}
 	}()
 
 	k.Start()

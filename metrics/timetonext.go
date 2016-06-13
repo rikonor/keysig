@@ -87,11 +87,11 @@ func (m *TimeToNext) processEvent(evt keyboard.ButtonEvent) {
 	}
 }
 
-// func (m *TimeToNext) Data() [][]string {
-// 	return [][]string{
-// 		{"first_name", "last_name", "username"},
-// 		{"Poopie", "Pike", "rob"},
-// 		{"Ken", "Thompson", "ken"},
-// 		{"Robert", "Griesemer", "gri"},
-// 	}
-// }
+func (m *TimeToNext) Data() [][]string {
+	return [][]string{
+		{"first_name", "last_name", "username"},
+		{"Poopie", "Pike", "rob"},
+		{"Ken", "Thompson", "ken"},
+		{"Robert", "Griesemer", "gri"},
+	}
+}
