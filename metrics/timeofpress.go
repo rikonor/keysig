@@ -6,6 +6,7 @@ import (
 
 	"azul3d.org/engine/keyboard"
 	"github.com/rikonor/keysig/keylogger"
+	"github.com/rikonor/keysig/utils"
 )
 
 type timeOfPressMetadata struct {
@@ -97,4 +98,22 @@ func (m *TimeOfPress) processEvent(evt keyboard.ButtonEvent) {
 	case keyboard.Up:
 		m.handleUpEvent(evt)
 	}
+}
+
+// Data implements the Reportee interface
+func (m *TimeOfPress) Data() [][]string {
+	// Convert timeOfPressData to [][]string for the reporter
+	data := [][]string{
+		{"key", "time_of_press"},
+	}
+
+	for k, md := range m.timeOfPressData {
+		l := []string{
+			k.String(),
+			utils.DurationToMSString(md.averageTime),
+		}
+		data = append(data, l)
+	}
+
+	return data
 }
