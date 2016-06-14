@@ -1,42 +1,26 @@
 package reports
 
-import (
-	"encoding/csv"
-	"fmt"
-	"log"
-	"os"
-)
-
+// Reporter tracks reportees and instructs them to report
 type Reporter struct {
-	reportees []Reportee
+	reportees map[string]Reportee
 }
 
+// New returns a new Reporter pointer
 func New() *Reporter {
-	return &Reporter{}
+	return &Reporter{
+		reportees: make(map[string]Reportee),
+	}
 }
 
-func (r *Reporter) WriteToCSV(p Reportee) {
-	fmt.Println("Writing metrics to CSV file")
+// Register adds a Reportee to the reporter's set of reportees
+func (r *Reporter) Register(pName string, p Reportee) {
+	r.reportees[pName] = p
+}
 
-	records := p.Data()
-
-	f, err := os.Create("./output.csv")
-	if err != nil {
-		log.Fatalln("error creating file: ./output.csv")
-	}
-
-	w := csv.NewWriter(f)
-
-	for _, record := range records {
-		if err := w.Write(record); err != nil {
-			log.Fatalln("error writing record to csv:", err)
-		}
-	}
-
-	// Write any buffered data to the underlying writer (standard output).
-	w.Flush()
-
-	if err := w.Error(); err != nil {
-		log.Fatal(err)
+// CollectReports iterates over registered reportees and instructs them
+// to write their reports to file
+func (r *Reporter) CollectReports() {
+	for _, p := range r.reportees {
+		p.WriteToCSV()
 	}
 }

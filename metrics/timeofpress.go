@@ -6,6 +6,7 @@ import (
 
 	"azul3d.org/engine/keyboard"
 	"github.com/rikonor/keysig/keylogger"
+	"github.com/rikonor/keysig/reports"
 	"github.com/rikonor/keysig/utils"
 )
 
@@ -43,6 +44,7 @@ func (m *TimeOfPress) consumeStream() {
 	}
 }
 
+// RegisterWith registers with a keylogger
 func (m *TimeOfPress) RegisterWith(k *keylogger.Keylogger) {
 	k.Register("timeOfPress", m.inputChan)
 
@@ -50,6 +52,11 @@ func (m *TimeOfPress) RegisterWith(k *keylogger.Keylogger) {
 		go m.consumeStream()
 		m.active = true
 	}
+}
+
+// RegisterWithReporter registers with a reporter
+func (m *TimeOfPress) RegisterWithReporter(r *reports.Reporter) {
+	r.Register("timeOfPress", m)
 }
 
 // Implementation
@@ -100,7 +107,7 @@ func (m *TimeOfPress) processEvent(evt keyboard.ButtonEvent) {
 	}
 }
 
-// Data implements the Reportee interface
+// Data collects our metrics data into a CSV compatible format
 func (m *TimeOfPress) Data() [][]string {
 	// Convert timeOfPressData to [][]string for the reporter
 	data := [][]string{
@@ -116,4 +123,9 @@ func (m *TimeOfPress) Data() [][]string {
 	}
 
 	return data
+}
+
+// WriteToCSV collects our metrics data and writes it to a CSV file
+func (m *TimeOfPress) WriteToCSV() {
+	utils.WriteToCSV("timeOfPress", m.Data())
 }

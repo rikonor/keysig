@@ -6,6 +6,8 @@ import (
 
 	"azul3d.org/engine/keyboard"
 	"github.com/rikonor/keysig/keylogger"
+	"github.com/rikonor/keysig/reports"
+	"github.com/rikonor/keysig/utils"
 )
 
 type timeToNextMetadata struct {
@@ -54,6 +56,7 @@ func (m *TimeToNext) consumeStream() {
 	}
 }
 
+// RegisterWith registers with a keylogger
 func (m *TimeToNext) RegisterWith(k *keylogger.Keylogger) {
 	k.Register("timeToNext", m.inputChan)
 
@@ -61,6 +64,11 @@ func (m *TimeToNext) RegisterWith(k *keylogger.Keylogger) {
 		go m.consumeStream()
 		m.active = true
 	}
+}
+
+// RegisterWithReporter registers with a reporter
+func (m *TimeToNext) RegisterWithReporter(r *reports.Reporter) {
+	r.Register("timeToNext", m)
 }
 
 // Implementation
@@ -87,6 +95,7 @@ func (m *TimeToNext) processEvent(evt keyboard.ButtonEvent) {
 	}
 }
 
+// Data collects our metrics data into a CSV compatible format
 func (m *TimeToNext) Data() [][]string {
 	return [][]string{
 		{"first_name", "last_name", "username"},
@@ -94,4 +103,9 @@ func (m *TimeToNext) Data() [][]string {
 		{"Ken", "Thompson", "ken"},
 		{"Robert", "Griesemer", "gri"},
 	}
+}
+
+// WriteToCSV collects our metrics data and writes it to a CSV file
+func (m *TimeToNext) WriteToCSV() {
+	utils.WriteToCSV("timeToNext", m.Data())
 }
