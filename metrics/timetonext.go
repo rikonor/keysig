@@ -57,13 +57,15 @@ func (m *TimeToNext) consumeStream() {
 }
 
 // RegisterWith registers with a keylogger
-func (m *TimeToNext) RegisterWith(k *keylogger.Keylogger) {
+func (m *TimeToNext) RegisterWith(k *keylogger.Keylogger) *TimeToNext {
 	k.Register("timeToNext", m.inputChan)
 
 	if !m.active {
 		go m.consumeStream()
 		m.active = true
 	}
+
+	return m
 }
 
 // RegisterWithReporter registers with a reporter
