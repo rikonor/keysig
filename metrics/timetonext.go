@@ -14,7 +14,12 @@ type timeToNextMetadata struct {
 	// averageTime tracks the average transition time from key A to key B
 	averageTime time.Duration
 	// toNextCount tracks how many times you've transitioned from key A to key B
-	toNextCount uint64
+	transitionsCount uint64
+}
+
+type PressMetadata struct {
+	key  keyboard.Key
+	time time.Time
 }
 
 // timeToNextAggregate holds the average transition time between two keys
@@ -29,8 +34,7 @@ type TimeToNext struct {
 	// timeToNextData contains all of our metrics data for key transitions
 	timeToNextData map[keyboard.Key]timeToNextAggregate
 
-	// currentlyPressed holds the currently pressed keys and when they were pressed
-	currentlyPressed map[keyboard.Key]time.Time
+	lastUpEvent PressMetadata
 }
 
 func NewTimeToNext() *TimeToNext {
@@ -38,19 +42,11 @@ func NewTimeToNext() *TimeToNext {
 		inputChan: make(chan keyboard.ButtonEvent),
 
 		// Implementation specific data
-		timeToNextData:   make(map[keyboard.Key]timeToNextAggregate),
-		currentlyPressed: make(map[keyboard.Key]time.Time),
+		timeToNextData: make(map[keyboard.Key]timeToNextAggregate),
 	}
 }
 
 func (m *TimeToNext) consumeStream() {
-	go func() {
-		for {
-			time.Sleep(3 * time.Second)
-			fmt.Println(m.currentlyPressed)
-		}
-	}()
-
 	for evt := range m.inputChan {
 		m.processEvent(evt)
 	}
@@ -77,15 +73,44 @@ func (m *TimeToNext) RegisterWithReporter(r *reports.Reporter) {
 
 // handleDownEvent keep track of last time of Down event
 func (m *TimeToNext) handleDownEvent(evt keyboard.ButtonEvent) {
-	// Update currentlyPressed keys
-	m.currentlyPressed[evt.Key] = time.Now()
+	// Skip the first time because lastUpEvent won't contain a valid value
+	if m.lastUpEvent == (PressMetadata{}) {
+		return
+	}
+
+	// If this is the first time this transition has occured
+	// initialize the data structure for it
+	_, ok := m.timeToNextData[m.lastUpEvent.key][evt.Key]
+	if !ok {
+		m.timeToNextData[m.lastUpEvent.key] = make(timeToNextAggregate)
+	}
+
+	// Update the values transitionsCount and averageTime for this transition
+	oldTransitionsCount := m.timeToNextData[m.lastUpEvent.key][evt.Key].transitionsCount
+
+	ttnm := timeToNextMetadata{
+		averageTime:      time.Now().Sub(m.lastUpEvent.time),
+		transitionsCount: oldTransitionsCount + 1,
+	}
+
+	m.timeToNextData[m.lastUpEvent.key][evt.Key] = ttnm
+
+	fmt.Println(
+		m.lastUpEvent.key,
+		"->",
+		evt.Key,
+		fmt.Sprintf("%dms\t", ttnm.averageTime.Nanoseconds()/(1000*1000)),
+		fmt.Sprintf("[%d times]", m.timeToNextData[m.lastUpEvent.key][evt.Key].transitionsCount),
+	)
 }
 
 // handleUpEvent keep track of last time of up event
-// as well as update the average press time and press count
 func (m *TimeToNext) handleUpEvent(evt keyboard.ButtonEvent) {
 	// Since key was released, update the currently pressed keys
-	delete(m.currentlyPressed, evt.Key)
+	m.lastUpEvent = PressMetadata{
+		key:  evt.Key,
+		time: time.Now(),
+	}
 }
 
 func (m *TimeToNext) processEvent(evt keyboard.ButtonEvent) {
