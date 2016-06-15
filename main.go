@@ -19,7 +19,7 @@ func main() {
 	// but also after a certain time we can write all our results to a csv file
 	go func() {
 		// Wait a few seconds before writing collected data to CSV
-		time.Sleep(20 * time.Second)
+		time.Sleep(10 * time.Second)
 		r.CollectReports()
 	}()
 

@@ -119,12 +119,30 @@ func (m *TimeToNext) processEvent(evt keyboard.ButtonEvent) {
 
 // Data collects our metrics data into a CSV compatible format
 func (m *TimeToNext) Data() [][]string {
-	return [][]string{
-		{"first_name", "last_name", "username"},
-		{"Poopie", "Pike", "rob"},
-		{"Ken", "Thompson", "ken"},
-		{"Robert", "Griesemer", "gri"},
+	data := [][]string{}
+
+	// Iterate over all transition start keys
+	// Each start key gets its own table
+	for tsKey, tsKeyData := range m.timeToNextData {
+		data = append(data,
+			// Set table header
+			[]string{tsKey.String()},
+			[]string{"key", "transition_time [ms]"},
+		)
+
+		// Iterate over transition end keys and populate table data
+		for teKey, teKeyData := range tsKeyData {
+			data = append(data, []string{
+				teKey.String(),
+				utils.DurationToMSString(teKeyData.averageTime),
+			})
+		}
+
+		// Add an empty line after every table
+		data = append(data, []string{})
 	}
+
+	return data
 }
 
 // WriteToCSV collects our metrics data and writes it to a CSV file
