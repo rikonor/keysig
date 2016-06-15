@@ -1,7 +1,6 @@
 package metrics
 
 import (
-	"fmt"
 	"time"
 
 	"azul3d.org/engine/keyboard"
@@ -88,20 +87,16 @@ func (m *TimeToNext) handleDownEvent(evt keyboard.ButtonEvent) {
 	// Update the values transitionsCount and averageTime for this transition
 	oldTransitionData := m.timeToNextData[m.lastUpEvent.key][evt.Key]
 
-	ttnm := timeToNextMetadata{
-		averageTime:      time.Now().Sub(m.lastUpEvent.time),
+	newAvgDuration := time.Duration(utils.RecomputeAverage(
+		float64(time.Now().Sub(m.lastUpEvent.time)), // newSample
+		float64(oldTransitionData.averageTime),      // oldAvg
+		oldTransitionData.transitionsCount,          // oldSampleCount
+	))
+
+	m.timeToNextData[m.lastUpEvent.key][evt.Key] = timeToNextMetadata{
+		averageTime:      newAvgDuration,
 		transitionsCount: oldTransitionData.transitionsCount + 1,
 	}
-
-	m.timeToNextData[m.lastUpEvent.key][evt.Key] = ttnm
-
-	fmt.Println(
-		m.lastUpEvent.key,
-		"->",
-		evt.Key,
-		fmt.Sprintf("%dms\t", ttnm.averageTime.Nanoseconds()/(1000*1000)),
-		fmt.Sprintf("[%d times]", m.timeToNextData[m.lastUpEvent.key][evt.Key].transitionsCount),
-	)
 }
 
 // handleUpEvent keep track of last time of up event

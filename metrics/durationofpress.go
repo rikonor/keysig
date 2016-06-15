@@ -86,18 +86,16 @@ func (m *DurationOfPress) handleUpEvent(evt keyboard.ButtonEvent) {
 	// Update the average
 	currData := m.durationOfPressData[evt.Key]
 
-	oldSum := currData.averageTime * time.Duration(currData.pressCount)
-	newSum := oldSum + m.lastUpTimes[evt.Key].Sub(m.lastDownTimes[evt.Key])
+	newAvgDuration := time.Duration(utils.RecomputeAverage(
+		float64(m.lastUpTimes[evt.Key].Sub(m.lastDownTimes[evt.Key])), // newSample
+		float64(currData.averageTime),                                 // oldAvg
+		currData.pressCount,                                           // oldSampleCount
+	))
 
-	newPressCount := currData.pressCount + 1
-	newAverage := time.Duration(uint64(newSum) / newPressCount)
-
-	newPressData := durationOfPressMetadata{
-		averageTime: newAverage,
-		pressCount:  newPressCount,
+	m.durationOfPressData[evt.Key] = durationOfPressMetadata{
+		averageTime: newAvgDuration,
+		pressCount:  currData.pressCount + 1,
 	}
-
-	m.durationOfPressData[evt.Key] = newPressData
 }
 
 func (m *DurationOfPress) processEvent(evt keyboard.ButtonEvent) {
