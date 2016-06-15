@@ -80,17 +80,17 @@ func (m *TimeToNext) handleDownEvent(evt keyboard.ButtonEvent) {
 
 	// If this is the first time this transition has occured
 	// initialize the data structure for it
-	_, ok := m.timeToNextData[m.lastUpEvent.key][evt.Key]
+	_, ok := m.timeToNextData[m.lastUpEvent.key]
 	if !ok {
 		m.timeToNextData[m.lastUpEvent.key] = make(timeToNextAggregate)
 	}
 
 	// Update the values transitionsCount and averageTime for this transition
-	oldTransitionsCount := m.timeToNextData[m.lastUpEvent.key][evt.Key].transitionsCount
+	oldTransitionData := m.timeToNextData[m.lastUpEvent.key][evt.Key]
 
 	ttnm := timeToNextMetadata{
 		averageTime:      time.Now().Sub(m.lastUpEvent.time),
-		transitionsCount: oldTransitionsCount + 1,
+		transitionsCount: oldTransitionData.transitionsCount + 1,
 	}
 
 	m.timeToNextData[m.lastUpEvent.key][evt.Key] = ttnm
