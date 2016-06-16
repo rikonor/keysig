@@ -1,7 +1,8 @@
 package main
 
 import (
-	"time"
+	"os"
+	"os/signal"
 
 	"github.com/rikonor/keysig/keylogger"
 	"github.com/rikonor/keysig/metrics"
@@ -16,12 +17,22 @@ func main() {
 	metrics.NewDurationOfPress().RegisterWith(k).RegisterWithReporter(r)
 
 	// Right now azul3d is blocking, therefore we shut off the logger with Ctrl+C
-	// but also after a certain time we can write all our results to a csv file
-	go func() {
-		// Wait a few seconds before writing collected data to CSV
-		time.Sleep(10 * time.Second)
-		r.CollectReports()
-	}()
+	setTermHandler(r)
 
 	k.Start()
+
+	// We can also shut off the logger by closing the window
+	r.CollectReports()
+}
+
+func setTermHandler(r *reports.Reporter) {
+	go func() {
+		// Wait for SIGTERM and collect the reports
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, os.Interrupt)
+		<-c
+
+		r.CollectReports()
+		os.Exit(0)
+	}()
 }

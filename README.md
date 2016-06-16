@@ -38,3 +38,4 @@ References
 
 * In Linux: https://github.com/MarinX/keylogger
 * In Mac: can't keylog (must be active process with Window atm)
+* OSX Keylogger in C: https://github.com/caseyscarborough/keylogger
