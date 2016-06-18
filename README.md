@@ -5,6 +5,17 @@ Extract useful statistics from keyboard events.
 
 ![Single Tile](docs/TimeOfPressReport.png)
 
+Some initial results
+---
+
+Generated signatures from two runs of typing the same text (just a random wikipedia article). The metric used to generate these signatures was the time taken from releasing a key to pressing the next one (time-to-next).
+
+##### Run 1
+![Run 1](docs/run1.jpeg)
+
+##### Run 2
+![Run 2](docs/run2.jpeg)
+
 Goals
 ---
 

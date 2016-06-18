@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"fmt"
 	"time"
 
 	"azul3d.org/engine/keyboard"
@@ -117,9 +118,53 @@ func (m *TimeToNext) processEvent(evt keyboard.ButtonEvent) {
 	}
 }
 
+func (m *TimeToNext) DataForHeatMap() [][]string {
+	data := [][]string{}
+
+	numOfKeys := len(utils.OrderedKeys)
+
+	for _, fromKey := range utils.OrderedKeys {
+		currLine := []string{}
+
+		// Check if fromKey has been previously recorded
+		_, ok := m.timeToNextData[fromKey]
+		if !ok {
+			// Shoud fill row with zeros
+			for i := 0; i < numOfKeys; i++ {
+				currLine = append(currLine, "0.0")
+			}
+			data = append(data, currLine)
+			// Continue to next key
+			continue
+		}
+
+		for _, toKey := range utils.OrderedKeys {
+			// Check if toKey has been previoulsy recorded for fromKey
+			_, ok := m.timeToNextData[fromKey][toKey]
+			if !ok {
+				// Should fill with a zero instead of missing value
+				currLine = append(currLine, "0.0")
+				continue
+			}
+
+			durationValue := m.timeToNextData[fromKey][toKey].averageTime
+			currLine = append(currLine, utils.DurationToMSString(durationValue))
+		}
+
+		data = append(data, currLine)
+	}
+
+	// Add headers on top and left [the key names]
+	// data = append(utils.OrderedKeys, data...)
+
+	return data
+}
+
 // Data collects our metrics data into a CSV compatible format
 func (m *TimeToNext) Data() [][]string {
 	data := [][]string{}
+
+	fmt.Println(m.DataForHeatMap())
 
 	// Iterate over all transition start keys
 	// Each start key gets its own table
@@ -147,5 +192,5 @@ func (m *TimeToNext) Data() [][]string {
 
 // WriteToCSV collects our metrics data and writes it to a CSV file
 func (m *TimeToNext) WriteToCSV() {
-	utils.WriteToCSV("timeToNext", m.Data())
+	utils.WriteToCSV("timeToNext", m.DataForHeatMap())
 }
