@@ -75,13 +75,13 @@ func (m *DurationOfPress) String() string {
 
 // handleDownEvent keep track of last time of Down event
 func (m *DurationOfPress) handleDownEvent(evt keyboard.ButtonEvent) {
-	m.lastDownTimes[evt.Key] = time.Now()
+	m.lastDownTimes[evt.Key] = evt.Time()
 }
 
 // handleUpEvent keep track of last time of up event
 // as well as update the average press time and press count
 func (m *DurationOfPress) handleUpEvent(evt keyboard.ButtonEvent) {
-	m.lastUpTimes[evt.Key] = time.Now()
+	m.lastUpTimes[evt.Key] = evt.Time()
 
 	// Update the average
 	currData := m.durationOfPressData[evt.Key]

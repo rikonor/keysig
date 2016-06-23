@@ -89,7 +89,7 @@ func (m *TimeToNext) handleDownEvent(evt keyboard.ButtonEvent) {
 	oldTransitionData := m.timeToNextData[m.lastUpEvent.key][evt.Key]
 
 	newAvgDuration := time.Duration(utils.RecomputeAverage(
-		float64(time.Now().Sub(m.lastUpEvent.time)), // newSample
+		float64(evt.Time().Sub(m.lastUpEvent.time)), // newSample
 		float64(oldTransitionData.averageTime),      // oldAvg
 		oldTransitionData.transitionsCount,          // oldSampleCount
 	))
@@ -105,7 +105,7 @@ func (m *TimeToNext) handleUpEvent(evt keyboard.ButtonEvent) {
 	// Since key was released, update the currently pressed keys
 	m.lastUpEvent = PressMetadata{
 		key:  evt.Key,
-		time: time.Now(),
+		time: evt.Time(),
 	}
 }
 
