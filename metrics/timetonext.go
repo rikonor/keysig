@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"azul3d.org/engine/keyboard"
 	"github.com/rikonor/keysig/keylogger"
+	"github.com/rikonor/keysig/keylogger/keyboard"
 	"github.com/rikonor/keysig/reports"
 	"github.com/rikonor/keysig/utils"
 )

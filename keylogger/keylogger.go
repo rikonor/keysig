@@ -5,7 +5,7 @@ import (
 
 	"azul3d.org/engine/gfx"
 	"azul3d.org/engine/gfx/window"
-	"azul3d.org/engine/keyboard"
+	"github.com/rikonor/keysig/keylogger/keyboard"
 )
 
 type Keylogger struct {
@@ -41,12 +41,23 @@ func (k *Keylogger) startStreaming(w window.Window) {
 
 	go func() {
 		for event := range events {
+			// Try converting button event from Azul3D
+			a3devt, ok := extractAzul3DButtonEvent(event)
+
 			// Make sure no unrelated events get through
-			evt, ok := event.(keyboard.ButtonEvent)
 			if !ok {
 				fmt.Println("Not a ButtonEvent event")
 				continue
 			}
+
+			evt := fromAzul3DEvent(a3devt)
+
+			// // Make sure no unrelated events get through
+			// evt, ok := event.(keyboard.ButtonEvent)
+			// if !ok {
+			// 	fmt.Println("Not a ButtonEvent event")
+			// 	continue
+			// }
 
 			k.broadcastEvent(evt)
 		}

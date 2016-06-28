@@ -1,6 +1,6 @@
 package utils
 
-import "azul3d.org/engine/keyboard"
+import "github.com/rikonor/keysig/keylogger/keyboard"
 
 var OrderedKeys = []keyboard.Key{
 	keyboard.A,
