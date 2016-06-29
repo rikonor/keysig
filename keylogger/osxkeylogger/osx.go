@@ -1,6 +1,10 @@
 package osxkeylogger
 
-import "github.com/rikonor/keysig/keylogger/keyboard"
+import (
+	"fmt"
+
+	"github.com/rikonor/keysig/keylogger/keyboard"
+)
 
 // Based on github.com/caseyscarborough/keylogger
 
@@ -8,7 +12,7 @@ import "github.com/rikonor/keysig/keylogger/keyboard"
 #cgo LDFLAGS: -framework ApplicationServices -framework Carbon
 #include "keylogger.h"
 
-extern void pushToChannel(int n);
+extern void handleButtonEvent(int k);
 
 static inline void start_logger() {
     // Create an event tap to retrieve keypresses.
@@ -41,13 +45,6 @@ static inline void start_logger() {
         exit(1);
     }
 
-    // Output to logfile.
-    fprintf(logfile, "\n\nKeylogging has begun.\n%s\n", asctime(localtime(&result)));
-    fflush(logfile);
-
-    // Display the location of the logfile and start the loop.
-    printf("Logging to: %s\n", logfileLocation);
-    fflush(stdout);
     CFRunLoopRun();
 }
 
@@ -58,159 +55,27 @@ static inline CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type
     // Retrieve the incoming keycode.
     CGKeyCode keyCode = (CGKeyCode) CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode);
 
-    // Print the human readable key to the logfile.
-    // create a char * eventType here and set it to ""
-    // Then do a switch over type and set eventType to the right string
-    // Then you don't need to have 3 fprintf statements
+		handleButtonEvent((int)keyCode);
 
-    if (type == kCGEventKeyDown) {
-      fprintf(logfile, "%s Down\n", convertKeyCode(keyCode));
-    }
-    if (type == kCGEventKeyUp) {
-      fprintf(logfile, "%s Up\n", convertKeyCode(keyCode));
-    }
-    if (type == kCGEventFlagsChanged) {
-      fprintf(logfile, "%s Changed\n", convertKeyCode(keyCode));
-    }
-
-    fflush(logfile);
-
-    return event;
-}
-
-// The following method converts the key code returned by each keypress as
-// a human readable key code in const char format.
-static inline const char *convertKeyCode(int keyCode) {
-    switch ((int) keyCode) {
-        case 0:   return "a";
-        case 1:   return "s";
-        case 2:   return "d";
-        case 3:   return "f";
-        case 4:   return "h";
-        case 5:   return "g";
-        case 6:   return "z";
-        case 7:   return "x";
-        case 8:   return "c";
-        case 9:   return "v";
-        case 11:  return "b";
-        case 12:  return "q";
-        case 13:  return "w";
-        case 14:  return "e";
-        case 15:  return "r";
-        case 16:  return "y";
-        case 17:  return "t";
-        case 18:  return "1";
-        case 19:  return "2";
-        case 20:  return "3";
-        case 21:  return "4";
-        case 22:  return "6";
-        case 23:  return "5";
-        case 24:  return "=";
-        case 25:  return "9";
-        case 26:  return "7";
-        case 27:  return "-";
-        case 28:  return "8";
-        case 29:  return "0";
-        case 30:  return "]";
-        case 31:  return "o";
-        case 32:  return "u";
-        case 33:  return "[";
-        case 34:  return "i";
-        case 35:  return "p";
-        case 37:  return "l";
-        case 38:  return "j";
-        case 39:  return "'";
-        case 40:  return "k";
-        case 41:  return ";";
-        case 42:  return "\\";
-        case 43:  return ",";
-        case 44:  return "/";
-        case 45:  return "n";
-        case 46:  return "m";
-        case 47:  return ".";
-        case 50:  return "`";
-        case 65:  return "[decimal]";
-        case 67:  return "[asterisk]";
-        case 69:  return "[plus]";
-        case 71:  return "[clear]";
-        case 75:  return "[divide]";
-        case 76:  return "[enter]";
-        case 78:  return "[hyphen]";
-        case 81:  return "[equals]";
-        case 82:  return "0";
-        case 83:  return "1";
-        case 84:  return "2";
-        case 85:  return "3";
-        case 86:  return "4";
-        case 87:  return "5";
-        case 88:  return "6";
-        case 89:  return "7";
-        case 91:  return "8";
-        case 92:  return "9";
-        case 36:  return "[return]";
-        case 48:  return "[tab]";
-        case 49:  return " ";
-        case 51:  return "[del]";
-        case 53:  return "[esc]";
-        case 54:  return "[right-cmd]";
-        case 55:  return "[left-cmd]";
-        case 56:  return "[left-shift]";
-        case 57:  return "[caps]";
-        case 58:  return "[left-option]";
-        case 59:  return "[left-ctrl]";
-        case 60:  return "[right-shift]";
-        case 61:  return "[right-option]";
-        case 62:  return "[right-ctrl]";
-        case 63:  return "[fn]";
-        case 64:  return "[f17]";
-        case 72:  return "[volup]";
-        case 73:  return "[voldown]";
-        case 74:  return "[mute]";
-        case 79:  return "[f18]";
-        case 80:  return "[f19]";
-        case 90:  return "[f20]";
-        case 96:  return "[f5]";
-        case 97:  return "[f6]";
-        case 98:  return "[f7]";
-        case 99:  return "[f3]";
-        case 100: return "[f8]";
-        case 101: return "[f9]";
-        case 103: return "[f11]";
-        case 105: return "[f13]";
-        case 106: return "[f16]";
-        case 107: return "[f14]";
-        case 109: return "[f10]";
-        case 111: return "[f12]";
-        case 113: return "[f15]";
-        case 114: return "[help]";
-        case 115: return "[home]";
-        case 116: return "[pgup]";
-        case 117: return "[fwddel]";
-        case 118: return "[f4]";
-        case 119: return "[end]";
-        case 120: return "[f2]";
-        case 121: return "[pgdown]";
-        case 122: return "[f1]";
-        case 123: return "[left]";
-        case 124: return "[right]";
-        case 125: return "[down]";
-        case 126: return "[up]";
-    }
-    return "[unknown]";
+		return event;
 }
 */
 import "C"
-import "fmt"
 
 var globalOutputChannel *chan keyboard.ButtonEvent
 
-//export pushToChannel
-func pushToChannel(n C.int) {
-	fmt.Println("Got evt", n)
+//export handleButtonEvent
+func handleButtonEvent(keyCode C.int) {
+	// TODO
+	// Convert from the int we get to an actual keyboard.Key
+	// Dedup still pressed keys. If a key is pressed for more then 1s then it will continue being reported
+	// Find the current key state based on previous events (the first event should always mean pressing down)
+
+	k := convertKeyCode(int(keyCode))
+	fmt.Println("Got", k)
 
 	evt := keyboard.ButtonEvent{}
 
-	// *outputChannel <- int(n)
 	*globalOutputChannel <- evt
 }
 
@@ -229,3 +94,127 @@ func (k *OSXKeylogger) Start() {
 }
 
 // Utils
+
+var keyCodeConversionTable = map[int]keyboard.Key{
+	0x00: keyboard.A,
+	0x01: keyboard.S,
+	0x02: keyboard.D,
+	0x03: keyboard.F,
+	0x04: keyboard.H,
+	0x05: keyboard.G,
+	0x06: keyboard.Z,
+	0x07: keyboard.X,
+	0x08: keyboard.C,
+	0x09: keyboard.V,
+	0x0B: keyboard.B,
+	0x0C: keyboard.Q,
+	0x0D: keyboard.W,
+	0x0E: keyboard.E,
+	0x0F: keyboard.R,
+	0x10: keyboard.Y,
+	0x11: keyboard.T,
+	0x12: keyboard.One,
+	0x13: keyboard.Two,
+	0x14: keyboard.Three,
+	0x15: keyboard.Four,
+	0x16: keyboard.Six,
+	0x17: keyboard.Five,
+	0x18: keyboard.Equals,
+	0x19: keyboard.Nine,
+	0x1A: keyboard.Seven,
+	0x1B: keyboard.Invalid, // Minus
+	0x1C: keyboard.Eight,
+	0x1D: keyboard.Zero,
+	0x1E: keyboard.RightBracket,
+	0x1F: keyboard.O,
+	0x20: keyboard.U,
+	0x21: keyboard.LeftBracket,
+	0x22: keyboard.I,
+	0x23: keyboard.P,
+	0x25: keyboard.L,
+	0x26: keyboard.J,
+	0x27: keyboard.Invalid, // Quote
+	0x28: keyboard.K,
+	0x29: keyboard.Semicolon,
+	0x2A: keyboard.BackSlash,
+	0x2B: keyboard.Comma,
+	0x2C: keyboard.Invalid, // Slash
+	0x2D: keyboard.N,
+	0x2E: keyboard.M,
+	0x2F: keyboard.Period,
+	0x32: keyboard.Invalid, // Grave
+	0x41: keyboard.Invalid, // KeypadDecimal
+	0x43: keyboard.Invalid, // KeypadMultiply
+	0x45: keyboard.Invalid, // KeypadPlus
+	0x47: keyboard.Invalid, // KeypadClear
+	0x4B: keyboard.Invalid, // KeypadDivide
+	0x4C: keyboard.Invalid, // KeypadEnter
+	0x4E: keyboard.Invalid, // KeypadMinus
+	0x51: keyboard.Invalid, // KeypadEquals
+	0x52: keyboard.Invalid, // Keypad0
+	0x53: keyboard.Invalid, // Keypad1
+	0x54: keyboard.Invalid, // Keypad2
+	0x55: keyboard.Invalid, // Keypad3
+	0x56: keyboard.Invalid, // Keypad4
+	0x57: keyboard.Invalid, // Keypad5
+	0x58: keyboard.Invalid, // Keypad6
+	0x59: keyboard.Invalid, // Keypad7
+	0x5B: keyboard.Invalid, // Keypad8
+	0x5C: keyboard.Invalid, // Keypad9
+	0x24: keyboard.Enter,
+	0x30: keyboard.Tab,
+	0x31: keyboard.Space,
+	0x33: keyboard.Delete,
+	0x35: keyboard.Escape,
+	0x37: keyboard.Invalid, // Command
+	0x38: keyboard.Invalid, // Shift
+	0x39: keyboard.CapsLock,
+	0x3A: keyboard.Invalid, // Option
+	0x3B: keyboard.Invalid, // Control
+	0x3C: keyboard.RightShift,
+	0x3D: keyboard.Invalid, // RightOption
+	0x3E: keyboard.RightCtrl,
+	0x3F: keyboard.Invalid, // Function
+	0x40: keyboard.F17,
+	0x48: keyboard.Invalid, // VolumeUp
+	0x49: keyboard.Invalid, // VolumeDown
+	0x4A: keyboard.Invalid, // Mute
+	0x4F: keyboard.F18,
+	0x50: keyboard.F19,
+	0x5A: keyboard.F20,
+	0x60: keyboard.F5,
+	0x61: keyboard.F6,
+	0x62: keyboard.F7,
+	0x63: keyboard.F3,
+	0x64: keyboard.F8,
+	0x65: keyboard.F9,
+	0x67: keyboard.F11,
+	0x69: keyboard.F13,
+	0x6A: keyboard.F16,
+	0x6B: keyboard.F14,
+	0x6D: keyboard.F10,
+	0x6F: keyboard.F12,
+	0x71: keyboard.F15,
+	0x72: keyboard.Help,
+	0x73: keyboard.Home,
+	0x74: keyboard.PageUp,
+	0x75: keyboard.Invalid, // ForwardDelete
+	0x76: keyboard.F4,
+	0x77: keyboard.End,
+	0x78: keyboard.F2,
+	0x79: keyboard.PageDown,
+	0x7A: keyboard.F1,
+	0x7B: keyboard.ArrowLeft,
+	0x7C: keyboard.ArrowRight,
+	0x7D: keyboard.ArrowDown,
+	0x7E: keyboard.ArrowUp,
+}
+
+func convertKeyCode(keyCode int) keyboard.Key {
+	// Search for keyCode in the conversion table
+	k, ok := keyCodeConversionTable[keyCode]
+	if !ok {
+		return keyboard.Invalid
+	}
+	return k
+}
