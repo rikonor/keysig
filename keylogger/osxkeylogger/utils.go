@@ -125,3 +125,18 @@ func convertKeyCode(keyCode int) keyboard.Key {
 	}
 	return k
 }
+
+var stateCodeConversionTable = map[int]keyboard.State{
+	0: keyboard.InvalidState,
+	1: keyboard.Down,
+	2: keyboard.Up,
+}
+
+func convertStateCode(stateCode int) keyboard.State {
+	// Search for stateCode in the conversion table
+	s, ok := stateCodeConversionTable[stateCode]
+	if !ok {
+		return keyboard.InvalidState
+	}
+	return s
+}

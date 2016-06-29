@@ -1,7 +1,6 @@
 package osxkeylogger
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/rikonor/keysig/keylogger/keyboard"
@@ -71,21 +70,38 @@ static inline CGEventRef CGEventCallback(CGEventTapProxy proxy, CGEventType type
 import "C"
 
 var globalOutputChannel *chan keyboard.ButtonEvent
+var pressedKeys = make(map[keyboard.Key]bool)
 
 //export handleButtonEvent
-func handleButtonEvent(keyCode C.int, s C.State) {
+func handleButtonEvent(keyCode C.int, stateCode C.State) {
 	// TODO
-	// [Don] Convert from the int we get to an actual keyboard.Key
-	// Dedup still pressed keys. If a key is pressed for more then 1s then it will continue being reported
+	// [Done] Convert from the int we get to an actual keyboard.Key
+	// [Done] Dedup still pressed keys. If a key is pressed for more then 1s then it will continue being reported
 	// Find the current key state based on previous events (the first event should always mean pressing down)
 
 	k := convertKeyCode(int(keyCode))
-	fmt.Println("Got", k, s)
+	// Skip invalid keys
+	if k == keyboard.Invalid {
+		return
+	}
+
+	s := convertStateCode(int(stateCode))
+
+	// Dedup still-pressed keys
+	if _, ok := pressedKeys[k]; (s == keyboard.Down) && ok {
+		return
+	}
+	if s == keyboard.Down {
+		pressedKeys[k] = true
+	}
+	if s == keyboard.Up {
+		delete(pressedKeys, k)
+	}
 
 	evt := keyboard.ButtonEvent{
 		T:     time.Now(),
 		Key:   k,
-		State: keyboard.Up,
+		State: s,
 	}
 
 	*globalOutputChannel <- evt
