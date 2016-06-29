@@ -1,4 +1,4 @@
-package keylogger
+package azul3dkeylogger
 
 import (
 	"fmt"
