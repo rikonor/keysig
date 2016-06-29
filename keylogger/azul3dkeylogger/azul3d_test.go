@@ -23,7 +23,6 @@ func TestCanConvertAzul3DEvent(t *testing.T) {
 		T:     tm,
 		Key:   keyboard.A,
 		State: keyboard.Up,
-		Raw:   0,
 	}
 
 	convertedEvent := fromAzul3DEvent(azul3DEvent)

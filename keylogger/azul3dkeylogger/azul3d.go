@@ -73,7 +73,6 @@ func fromAzul3DEvent(be azul3d.ButtonEvent) keyboard.ButtonEvent {
 		T:     be.T,
 		Key:   fromAzul3DKey(be.Key),
 		State: fromAzul3DState(be.State),
-		Raw:   be.Raw,
 	}
 }
 

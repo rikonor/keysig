@@ -22,7 +22,6 @@ type ButtonEvent struct {
 	T     time.Time
 	Key   Key
 	State State
-	Raw   uint64
 }
 
 // Time returns the time at which this event occured.
@@ -32,7 +31,7 @@ func (b ButtonEvent) Time() time.Time {
 
 // String returns an string representation of this event.
 func (b ButtonEvent) String() string {
-	return fmt.Sprintf("ButtonEvent(Key=%v, State=%v, Raw=%v, Time=%v)", b.Key, b.State, b.Raw, b.T)
+	return fmt.Sprintf("ButtonEvent(Key=%v, State=%v, Time=%v)", b.Key, b.State, b.T)
 }
 
 // Typed represents an event where some sort of user input has generated a
