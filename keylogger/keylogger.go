@@ -1,12 +1,6 @@
 package keylogger
 
-import (
-	"fmt"
-
-	"azul3d.org/engine/gfx"
-	"azul3d.org/engine/gfx/window"
-	"github.com/rikonor/keysig/keylogger/keyboard"
-)
+import "github.com/rikonor/keysig/keylogger/keyboard"
 
 type Keylogger struct {
 	consumers map[string]chan keyboard.ButtonEvent
@@ -33,48 +27,16 @@ func (k *Keylogger) broadcastEvent(e keyboard.ButtonEvent) {
 	}
 }
 
-// startStreaming consumes button events from the global window
-// and forwards them to the registered consumers
-func (k *Keylogger) startStreaming(w window.Window) {
-	events := make(chan window.Event, 256)
-	w.Notify(events, window.KeyboardButtonEvents)
+// Start ...
+func (k *Keylogger) Start() {
+	eChan := make(chan keyboard.ButtonEvent, 256)
 
 	go func() {
-		for event := range events {
-			// Try converting button event from Azul3D
-			a3devt, ok := extractAzul3DButtonEvent(event)
-
-			// Make sure no unrelated events get through
-			if !ok {
-				fmt.Println("Not a ButtonEvent event")
-				continue
-			}
-
-			evt := fromAzul3DEvent(a3devt)
-
-			// // Make sure no unrelated events get through
-			// evt, ok := event.(keyboard.ButtonEvent)
-			// if !ok {
-			// 	fmt.Println("Not a ButtonEvent event")
-			// 	continue
-			// }
-
+		for evt := range eChan {
 			k.broadcastEvent(evt)
 		}
 	}()
-}
 
-// blockForever renders a black screen and blocks forever
-func (k *Keylogger) blockForever(d gfx.Device) {
-	for {
-		d.Render()
-	}
-}
-
-// Start ...
-func (k *Keylogger) Start() {
-	window.Run(func(w window.Window, d gfx.Device) {
-		k.startStreaming(w)
-		k.blockForever(d)
-	}, nil)
+	a3dk := NewAzul3DKeylogger(&eChan)
+	a3dk.Start()
 }

@@ -1,9 +1,62 @@
 package keylogger
 
 import (
+	"fmt"
+
+	"azul3d.org/engine/gfx"
+	"azul3d.org/engine/gfx/window"
+
 	azul3d "azul3d.org/engine/keyboard"
 	"github.com/rikonor/keysig/keylogger/keyboard"
 )
+
+// Azul3D keylogger
+
+type Azul3DKeylogger struct {
+	outputChannel *chan keyboard.ButtonEvent
+}
+
+func NewAzul3DKeylogger(outputChannel *chan keyboard.ButtonEvent) *Azul3DKeylogger {
+	return &Azul3DKeylogger{outputChannel: outputChannel}
+}
+
+// startStreaming consumes button events from the global window
+// and forwards them to the registered consumers
+func (k *Azul3DKeylogger) startStreaming(w window.Window) {
+	events := make(chan window.Event, 256)
+	w.Notify(events, window.KeyboardButtonEvents)
+
+	go func() {
+		for event := range events {
+			// Try converting button event from Azul3D
+			// and make sure no unrelated events get through
+			a3devt, ok := extractAzul3DButtonEvent(event)
+			if !ok {
+				fmt.Println("Not a ButtonEvent event")
+				continue
+			}
+
+			evt := fromAzul3DEvent(a3devt)
+			*k.outputChannel <- evt
+		}
+	}()
+}
+
+// blockForever renders a black screen and blocks forever
+func (k *Azul3DKeylogger) blockForever(d gfx.Device) {
+	for {
+		d.Render()
+	}
+}
+
+func (k *Azul3DKeylogger) Start() {
+	window.Run(func(w window.Window, d gfx.Device) {
+		k.startStreaming(w)
+		k.blockForever(d)
+	}, nil)
+}
+
+// Utils
 
 func extractAzul3DButtonEvent(be interface{}) (azul3d.ButtonEvent, bool) {
 	evt, ok := be.(azul3d.ButtonEvent)
