@@ -10,6 +10,10 @@ import (
 	"github.com/rikonor/keysig/utils"
 )
 
+// maxTransitionDuration is the transition duration at which we assume
+// the transition is not part of a normal typing flow (long pause, etc)
+var maxTransitionDuration = time.Second
+
 type timeToNextMetadata struct {
 	// averageTime tracks the average transition time from key A to key B
 	averageTime time.Duration
@@ -75,6 +79,12 @@ func (m *TimeToNext) RegisterWithReporter(r *reports.Reporter) {
 func (m *TimeToNext) handleDownEvent(evt keyboard.ButtonEvent) {
 	// Skip the first time because lastUpEvent won't contain a valid value
 	if m.lastUpEvent == (PressMetadata{}) {
+		return
+	}
+
+	// Ignore very long transitions, they might represent long pauses in typing
+	transitionDuration := evt.Time().Sub(m.lastUpEvent.time)
+	if transitionDuration > maxTransitionDuration {
 		return
 	}
 
