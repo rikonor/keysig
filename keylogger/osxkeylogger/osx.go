@@ -1,6 +1,8 @@
 package osxkeylogger
 
 import (
+	"log"
+	"os/user"
 	"time"
 
 	"github.com/rikonor/keysig/keylogger/keyboard"
@@ -38,15 +40,6 @@ static inline void start_logger() {
     CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, kCFRunLoopCommonModes);
     CGEventTapEnable(eventTap, true);
 
-    // Get the current time and open the logfile.
-    time_t result = time(NULL);
-    logfile = fopen(logfileLocation, "a");
-
-    if (!logfile) {
-        fprintf(stderr, "ERROR: Unable to open log file. Ensure that you have the proper permissions.\n");
-        exit(1);
-    }
-
     CFRunLoopRun();
 }
 
@@ -74,11 +67,6 @@ var pressedKeys = make(map[keyboard.Key]bool)
 
 //export handleButtonEvent
 func handleButtonEvent(keyCode C.int, stateCode C.State) {
-	// TODO
-	// [Done] Convert from the int we get to an actual keyboard.Key
-	// [Done] Dedup still pressed keys. If a key is pressed for more then 1s then it will continue being reported
-	// Find the current key state based on previous events (the first event should always mean pressing down)
-
 	k := convertKeyCode(int(keyCode))
 	// Skip invalid keys
 	if k == keyboard.Invalid {
@@ -112,6 +100,15 @@ type OSXKeylogger struct {
 }
 
 func NewOSXKeylogger(outputChannel *chan keyboard.ButtonEvent) *OSXKeylogger {
+	// Ensure keylogger is running as root, otherwise no key events will be captured
+	u, err := user.Current()
+	if err != nil {
+		log.Fatalln("Failed to check root status:", err)
+	}
+	if u.Username != "root" {
+		log.Fatalln("Non-root user detected. Key events will not be captured. Aborting..")
+	}
+
 	// Assign the global outputChannel
 	globalOutputChannel = outputChannel
 	return &OSXKeylogger{outputChannel: outputChannel}
