@@ -29,7 +29,7 @@ var keyCodeConversionTable = map[int]keyboard.Key{
 	0x18: keyboard.Equals,
 	0x19: keyboard.Nine,
 	0x1A: keyboard.Seven,
-	0x1B: keyboard.Invalid, // Minus
+	0x1B: keyboard.Dash,
 	0x1C: keyboard.Eight,
 	0x1D: keyboard.Zero,
 	0x1E: keyboard.RightBracket,
@@ -40,52 +40,32 @@ var keyCodeConversionTable = map[int]keyboard.Key{
 	0x23: keyboard.P,
 	0x25: keyboard.L,
 	0x26: keyboard.J,
-	0x27: keyboard.Invalid, // Quote
+	0x27: keyboard.Apostrophe,
 	0x28: keyboard.K,
 	0x29: keyboard.Semicolon,
 	0x2A: keyboard.BackSlash,
 	0x2B: keyboard.Comma,
-	0x2C: keyboard.Invalid, // Slash
+	0x2C: keyboard.ForwardSlash,
 	0x2D: keyboard.N,
 	0x2E: keyboard.M,
 	0x2F: keyboard.Period,
-	0x32: keyboard.Invalid, // Grave
-	0x41: keyboard.Invalid, // KeypadDecimal
-	0x43: keyboard.Invalid, // KeypadMultiply
-	0x45: keyboard.Invalid, // KeypadPlus
-	0x47: keyboard.Invalid, // KeypadClear
-	0x4B: keyboard.Invalid, // KeypadDivide
-	0x4C: keyboard.Invalid, // KeypadEnter
-	0x4E: keyboard.Invalid, // KeypadMinus
-	0x51: keyboard.Invalid, // KeypadEquals
-	0x52: keyboard.Invalid, // Keypad0
-	0x53: keyboard.Invalid, // Keypad1
-	0x54: keyboard.Invalid, // Keypad2
-	0x55: keyboard.Invalid, // Keypad3
-	0x56: keyboard.Invalid, // Keypad4
-	0x57: keyboard.Invalid, // Keypad5
-	0x58: keyboard.Invalid, // Keypad6
-	0x59: keyboard.Invalid, // Keypad7
-	0x5B: keyboard.Invalid, // Keypad8
-	0x5C: keyboard.Invalid, // Keypad9
+	0x32: keyboard.Tilde,
 	0x24: keyboard.Enter,
 	0x30: keyboard.Tab,
 	0x31: keyboard.Space,
 	0x33: keyboard.Delete,
 	0x35: keyboard.Escape,
-	0x37: keyboard.Invalid, // Command
-	0x38: keyboard.Invalid, // Shift
+	0x36: keyboard.RightSuper,
+	0x37: keyboard.LeftSuper,
+	0x38: keyboard.LeftShift,
 	0x39: keyboard.CapsLock,
-	0x3A: keyboard.Invalid, // Option
-	0x3B: keyboard.Invalid, // Control
+	0x3A: keyboard.LeftAlt,
+	0x3B: keyboard.LeftCtrl,
 	0x3C: keyboard.RightShift,
-	0x3D: keyboard.Invalid, // RightOption
+	0x3D: keyboard.RightAlt,
 	0x3E: keyboard.RightCtrl,
 	0x3F: keyboard.Invalid, // Function
 	0x40: keyboard.F17,
-	0x48: keyboard.Invalid, // VolumeUp
-	0x49: keyboard.Invalid, // VolumeDown
-	0x4A: keyboard.Invalid, // Mute
 	0x4F: keyboard.F18,
 	0x50: keyboard.F19,
 	0x5A: keyboard.F20,
@@ -105,7 +85,7 @@ var keyCodeConversionTable = map[int]keyboard.Key{
 	0x72: keyboard.Help,
 	0x73: keyboard.Home,
 	0x74: keyboard.PageUp,
-	0x75: keyboard.Invalid, // ForwardDelete
+	0x75: keyboard.Delete,
 	0x76: keyboard.F4,
 	0x77: keyboard.End,
 	0x78: keyboard.F2,
