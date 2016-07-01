@@ -1,9 +1,6 @@
 package keylogger
 
-import (
-	"github.com/rikonor/keysig/keylogger/keyboard"
-	"github.com/rikonor/keysig/keylogger/osxkeylogger"
-)
+import "github.com/rikonor/keysig/keylogger/keyboard"
 
 type Keylogger struct {
 	consumers map[string]chan keyboard.ButtonEvent
@@ -40,9 +37,12 @@ func (k *Keylogger) Start() {
 		}
 	}()
 
-	osxk := osxkeylogger.NewOSXKeylogger(&eChan)
-	osxk.Start()
+	// osxk := osxkeylogger.NewOSXKeylogger(&eChan)
+	// osxk.Start()
 
 	// a3dk := azul3dkeylogger.NewAzul3DKeylogger(&eChan)
 	// a3dk.Start()
+
+	rk := NewReplayKeylogger(&eChan, nil)
+	rk.Start()
 }
