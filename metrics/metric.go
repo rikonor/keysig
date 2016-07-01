@@ -5,5 +5,5 @@ import (
 )
 
 type Metric interface {
-	RegisterWith(*keylogger.Keylogger) *Metric
+	RegisterWith(*keylogger.Manager) *Metric
 }

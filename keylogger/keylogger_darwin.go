@@ -1,4 +1,4 @@
-package osxkeylogger
+package keylogger
 
 import (
 	"log"
@@ -95,11 +95,11 @@ func handleButtonEvent(keyCode C.int, stateCode C.State) {
 	*globalOutputChannel <- evt
 }
 
-type OSXKeylogger struct {
+type Keylogger struct {
 	outputChannel *chan keyboard.ButtonEvent
 }
 
-func NewOSXKeylogger(outputChannel *chan keyboard.ButtonEvent) *OSXKeylogger {
+func NewKeylogger(outputChannel *chan keyboard.ButtonEvent) *Keylogger {
 	// Ensure keylogger is running as root, otherwise no key events will be captured
 	u, err := user.Current()
 	if err != nil {
@@ -111,9 +111,9 @@ func NewOSXKeylogger(outputChannel *chan keyboard.ButtonEvent) *OSXKeylogger {
 
 	// Assign the global outputChannel
 	globalOutputChannel = outputChannel
-	return &OSXKeylogger{outputChannel: outputChannel}
+	return &Keylogger{outputChannel: outputChannel}
 }
 
-func (k *OSXKeylogger) Start() {
+func (k *Keylogger) Start() {
 	C.start_logger()
 }

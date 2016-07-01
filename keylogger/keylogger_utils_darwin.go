@@ -1,4 +1,4 @@
-package osxkeylogger
+package keylogger
 
 import "github.com/rikonor/keysig/keylogger/keyboard"
 

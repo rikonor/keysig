@@ -10,16 +10,16 @@ import (
 )
 
 func main() {
-	k := keylogger.New()
+	m := keylogger.NewManager()
 	r := reports.New()
 
-	metrics.NewTimeToNext().RegisterWith(k).RegisterWithReporter(r)
-	metrics.NewDurationOfPress().RegisterWith(k).RegisterWithReporter(r)
+	metrics.NewTimeToNext().RegisterWith(m).RegisterWithReporter(r)
+	metrics.NewDurationOfPress().RegisterWith(m).RegisterWithReporter(r)
 
 	// Right now azul3d is blocking, therefore we shut off the logger with Ctrl+C
 	setTermHandler(r)
 
-	k.Start()
+	m.Start()
 
 	// We can also shut off the logger by closing the window
 	r.CollectReports()

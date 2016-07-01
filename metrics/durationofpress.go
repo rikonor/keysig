@@ -45,7 +45,7 @@ func (m *DurationOfPress) consumeStream() {
 }
 
 // RegisterWith registers with a keylogger
-func (m *DurationOfPress) RegisterWith(k *keylogger.Keylogger) *DurationOfPress {
+func (m *DurationOfPress) RegisterWith(k *keylogger.Manager) *DurationOfPress {
 	k.Register("durationOfPress", m.inputChan)
 
 	if !m.active {

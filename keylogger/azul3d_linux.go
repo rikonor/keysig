@@ -1,4 +1,4 @@
-package azul3dkeylogger
+package keylogger
 
 import (
 	"fmt"
@@ -12,17 +12,17 @@ import (
 
 // Azul3D keylogger
 
-type Azul3DKeylogger struct {
+type Keylogger struct {
 	outputChannel *chan keyboard.ButtonEvent
 }
 
-func NewAzul3DKeylogger(outputChannel *chan keyboard.ButtonEvent) *Azul3DKeylogger {
-	return &Azul3DKeylogger{outputChannel: outputChannel}
+func NewKeylogger(outputChannel *chan keyboard.ButtonEvent) *Keylogger {
+	return &Keylogger{outputChannel: outputChannel}
 }
 
 // startStreaming consumes button events from the global window
 // and forwards them to the registered consumers
-func (k *Azul3DKeylogger) startStreaming(w window.Window) {
+func (k *Keylogger) startStreaming(w window.Window) {
 	events := make(chan window.Event, 256)
 	w.Notify(events, window.KeyboardButtonEvents)
 
@@ -43,13 +43,13 @@ func (k *Azul3DKeylogger) startStreaming(w window.Window) {
 }
 
 // blockForever renders a black screen and blocks forever
-func (k *Azul3DKeylogger) blockForever(d gfx.Device) {
+func (k *Keylogger) blockForever(d gfx.Device) {
 	for {
 		d.Render()
 	}
 }
 
-func (k *Azul3DKeylogger) Start() {
+func (k *Keylogger) Start() {
 	window.Run(func(w window.Window, d gfx.Device) {
 		k.startStreaming(w)
 		k.blockForever(d)

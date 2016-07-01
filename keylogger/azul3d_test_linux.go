@@ -1,4 +1,4 @@
-package azul3dkeylogger
+package keylogger
 
 import (
 	"reflect"
