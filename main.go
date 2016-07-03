@@ -15,14 +15,13 @@ func main() {
 
 	metrics.NewTimeToNext().RegisterWith(m).RegisterWithReporter(r)
 	metrics.NewDurationOfPress().RegisterWith(m).RegisterWithReporter(r)
+	metrics.NewKeyDistribution().RegisterWith(m).RegisterWithReporter(r)
 
-	// Right now azul3d is blocking, therefore we shut off the logger with Ctrl+C
+	// Setup SIGTERM handler
 	setTermHandler(r)
 
 	r.TriggerPeriodically(0)
 	m.Start()
-
-	// We can also shut off the logger by closing the window
 	r.CollectReports()
 }
 
