@@ -52,3 +52,6 @@ References
 * OSX Keylogger in C: https://github.com/caseyscarborough/keylogger
 * http://osxbook.com/book/bonus/chapter2/alterkeys/
 * https://github.com/montanaflynn/stats
+* http://www.cs.cmu.edu/~keystroke/
+* http://www1.cs.columbia.edu/~hgs/teaching/security/hw/keystroke.pdf
+* https://www.keytrac.net
