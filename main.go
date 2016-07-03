@@ -19,6 +19,7 @@ func main() {
 	// Right now azul3d is blocking, therefore we shut off the logger with Ctrl+C
 	setTermHandler(r)
 
+	r.TriggerPeriodically(0)
 	m.Start()
 
 	// We can also shut off the logger by closing the window

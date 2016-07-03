@@ -1,5 +1,9 @@
 package reports
 
+import "time"
+
+const defaultCollectionPeriod = 30 * time.Second
+
 // Reporter tracks reportees and instructs them to report
 type Reporter struct {
 	reportees map[string]Reportee
@@ -23,4 +27,19 @@ func (r *Reporter) CollectReports() {
 	for _, p := range r.reportees {
 		p.WriteToCSV()
 	}
+}
+
+// TriggerPeriodically will periodically trigger collection of reports
+func (r *Reporter) TriggerPeriodically(d time.Duration) {
+	cp := defaultCollectionPeriod
+	if d != 0 {
+		cp = d
+	}
+
+	go func() {
+		for {
+			time.Sleep(cp)
+			r.CollectReports()
+		}
+	}()
 }
