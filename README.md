@@ -3,46 +3,43 @@ KeySig
 
 Extract useful statistics from keyboard events.
 
-![Single Tile](docs/TimeOfPressReport.png)
-
-Some initial results
+Goals
 ---
 
-Generated signatures from two runs of typing the same text (just a random wikipedia article). The metric used to generate these signatures was the time taken from releasing a key to pressing the next one (time-to-next).
+* Extract metrics from keystroke data.
+* Generate a verifiable signature from the metrics.
+* Create a mechanism to authenticate a user based on a previous signature.
+
+Metrics
+---
+
+* Duration of key press [**_durationOfPress_**]
+* Duration of key transition [**_timeToNext_**]
+* Distribution of keys [**_keyDistribution_**]
+* Length of line [Not implemented]
+* Spelling mistakes [Not implemented]
+
+Initial Results
+---
+
+Evolution of a _timeToNext_-based signature over the course of 3 hours. Frames were taken every 3 minutes. No filtering was done at this point.
+
+The shade of gray represents the keypress duration relative to the others.
+Black squares indicate either a very fast transition time relative to the other transitions or one that hasn't been encountered yet.
+
+![timeToNextEvolution](docs/out.gif)
+
+Simple _durationOfPress_ chart showing average values.
+
+![durationOfPress](docs/TimeOfPressReport.png)
+
+_timeToNext_-based signatures from two runs of typing the same text (random wikipedia article).
 
 ##### Run 1
 ![Run 1](docs/run1.jpeg)
 
 ##### Run 2
 ![Run 2](docs/run2.jpeg)
-
-Goals
----
-
-* Extract metrics from typing data.
-* Generate a verifiable signature from the metrics.
-* Get the typing data using a KeyLogger that runs in the background.
-* Create a mechanism to authenticate a user based on a previous signature.
-* Create alert when user fails authentication.
-
-Ideas for metrics
----
-
-1. Histogram of keys typed.
-2. Stream of events (this could be the base data actually) such as keydown, keyup.
-3. Time between different keys. h -> e -> l -> l -> o, etc
-4. Length of line.
-5. Wrong spelling.
-6. Keypress duration.
-7. Different transition periods (word-to-word, char-to-char, etc).
-
-Program structure
----
-
-* Keylogger is running on main thread and is blocking.
-* Keylogger provides a channel of events.
-* MetricsAnalyzers are consuming this channel (however we need this channel to be broadcast to all of them)
-Each metric analyzer is specialized for a certain type of metric.
 
 References
 ---
