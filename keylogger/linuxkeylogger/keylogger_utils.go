@@ -1,4 +1,4 @@
-package keylogger
+package linuxkeylogger
 
 import "github.com/rikonor/keysig/keylogger/keyboard"
 

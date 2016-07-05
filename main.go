@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"os/signal"
+	"time"
 
 	"github.com/rikonor/keysig/keylogger"
 	"github.com/rikonor/keysig/metrics"
@@ -20,7 +21,7 @@ func main() {
 	// Setup SIGTERM handler
 	setTermHandler(r)
 
-	r.TriggerPeriodically(0)
+	r.TriggerPeriodically(3 * time.Minute)
 	m.Start()
 	r.CollectReports()
 }
