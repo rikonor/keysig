@@ -2,6 +2,8 @@ package keylogger
 
 import (
 	"fmt"
+	"log"
+	"strings"
 	"time"
 
 	"github.com/MarinX/keylogger"
@@ -40,23 +42,37 @@ func (k *Keylogger) handleButtonEvent(keyCode int, stateCode int) {
 	*k.outputChannel <- evt
 }
 
-func (k *Keylogger) Start() {
+func (k *Keylogger) setupDevice() *keylogger.KeyLogger {
 	devs, err := keylogger.NewDevices()
 	if err != nil {
 		fmt.Println(err)
-		return
+		return nil
 	}
 
-	// for _, val := range devs {
-	// 	fmt.Println("Id->", val.Id, "Device->", val.Name)
-	// }
+	// Search for the keyboard device
+	devIdx := -1
+	for idx, val := range devs {
+		if strings.Contains(val.Name, "keyboard") {
+			devIdx = idx
+			break
+		}
+	}
+	if devIdx == -1 {
+		return nil
+	}
 
-	rd := keylogger.NewKeyLogger(devs[2])
+	return keylogger.NewKeyLogger(devs[devIdx])
+}
+
+func (k *Keylogger) Start() {
+	rd := k.setupDevice()
+	if rd == nil {
+		log.Fatalln("Failed to find keyboard device. Aborting..")
+	}
 
 	eventStream, err := rd.Read()
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatalln(err)
 	}
 
 	for evt := range eventStream {
