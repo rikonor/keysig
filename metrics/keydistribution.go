@@ -93,15 +93,19 @@ func (m *KeyDistribution) Data() [][]string {
 		{"key", "distribution"},
 	}
 
-	for k, md := range m.keyDistributionData {
-		// Calculate the actual distribution
-		keyDistribution := float64(md.pressCount) / float64(m.totalPressCount)
+	// Iterating over OrderedKeys so our result is sorted
+	// Notice OrderedKeys does not contain all keys (only letters)
+	for _, k := range utils.OrderedKeys {
+		if md, ok := m.keyDistributionData[k]; ok {
+			// Calculate the actual distribution
+			keyDistribution := float64(md.pressCount) / float64(m.totalPressCount)
 
-		l := []string{
-			k.String(),
-			fmt.Sprint(keyDistribution),
+			l := []string{
+				k.String(),
+				fmt.Sprint(keyDistribution),
+			}
+			data = append(data, l)
 		}
-		data = append(data, l)
 	}
 
 	return data

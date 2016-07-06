@@ -114,12 +114,17 @@ func (m *DurationOfPress) Data() [][]string {
 		{"key", "duration_of_press [ms]"},
 	}
 
-	for k, md := range m.durationOfPressData {
-		l := []string{
-			k.String(),
-			utils.DurationToMSString(md.averageTime),
+	// Iterating over OrderedKeys so our data is sorted
+	// Notice OrderedKeys doesn't contain every possible key (only letters)
+	for _, k := range utils.OrderedKeys {
+		// check if data was captured for current key
+		if md, ok := m.durationOfPressData[k]; ok {
+			l := []string{
+				k.String(),
+				utils.DurationToMSString(md.averageTime),
+			}
+			data = append(data, l)
 		}
-		data = append(data, l)
 	}
 
 	return data
