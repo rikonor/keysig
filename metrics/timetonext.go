@@ -1,7 +1,6 @@
 package metrics
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/rikonor/keysig/keylogger"
@@ -10,9 +9,15 @@ import (
 	"github.com/rikonor/keysig/utils"
 )
 
-// maxTransitionDuration is the transition duration at which we assume
-// the transition is not part of a normal typing flow (long pause, etc)
-var maxTransitionDuration = time.Second
+const (
+	// maxTransitionDuration is the transition duration at which we assume
+	// the transition is not part of a normal typing flow (long pause, etc)
+	maxTransitionDuration = time.Second
+
+	// minTransitionsCount is the minimum amount of transitions
+	// that need to be recorded before a transition is assumed to be valid
+	minTransitionsCount uint64 = 5
+)
 
 type timeToNextMetadata struct {
 	// averageTime tracks the average transition time from key A to key B
@@ -150,15 +155,20 @@ func (m *TimeToNext) DataForHeatMap() [][]string {
 
 		for _, toKey := range utils.OrderedKeys {
 			// Check if toKey has been previoulsy recorded for fromKey
-			_, ok := m.timeToNextData[fromKey][toKey]
+			md, ok := m.timeToNextData[fromKey][toKey]
 			if !ok {
 				// Should fill with a zero instead of missing value
 				currLine = append(currLine, "0.0")
 				continue
 			}
 
-			durationValue := m.timeToNextData[fromKey][toKey].averageTime
-			currLine = append(currLine, utils.DurationToMSString(durationValue))
+			// Check if transition has been recorded enough times
+			if md.transitionsCount < minTransitionsCount {
+				currLine = append(currLine, "0.0")
+				continue
+			}
+
+			currLine = append(currLine, utils.DurationToMSString(md.averageTime))
 		}
 
 		data = append(data, currLine)
@@ -173,8 +183,6 @@ func (m *TimeToNext) DataForHeatMap() [][]string {
 // Data collects our metrics data into a CSV compatible format
 func (m *TimeToNext) Data() [][]string {
 	data := [][]string{}
-
-	fmt.Println(m.DataForHeatMap())
 
 	// Iterate over all transition start keys
 	// Each start key gets its own table
