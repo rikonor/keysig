@@ -10,10 +10,20 @@ import (
 	"github.com/rikonor/keysig/utils"
 )
 
-type durationOfPressMetadata struct {
-	averageTime time.Duration
-	pressCount  uint64
-}
+const (
+	// maxDuration is the keypress duration at which we assume
+	// the keypress is not part of a normal typing flow (long pause, etc)
+	maxDuration = time.Second
+
+	// minPressCount is the minimum amount of key presses
+	// that need to be recorded before a keypress data is assumed to be valid
+	minPressCount uint64 = 2
+
+	// maxDurationStd is the maximum allowed standard deviation
+	// for keypress durations, anything above that means the values are too
+	// spread out to have any statistical significance
+	maxDurationStd = 50 * time.Millisecond
+)
 
 // DurationOfPress metric type keeps track of the average time a key is pressed
 // E.g. the time from keyUp of key A and keyDown of key A
@@ -21,7 +31,7 @@ type DurationOfPress struct {
 	inputChan chan keyboard.ButtonEvent
 	active    bool
 
-	durationOfPressData map[keyboard.Key]durationOfPressMetadata
+	durationOfPressData map[keyboard.Key]*utils.Stats
 
 	lastDownTimes map[keyboard.Key]time.Time
 	lastUpTimes   map[keyboard.Key]time.Time
@@ -32,7 +42,7 @@ func NewDurationOfPress() *DurationOfPress {
 		inputChan: make(chan keyboard.ButtonEvent),
 
 		// Implementation specific data
-		durationOfPressData: make(map[keyboard.Key]durationOfPressMetadata),
+		durationOfPressData: make(map[keyboard.Key]*utils.Stats),
 		lastDownTimes:       make(map[keyboard.Key]time.Time),
 		lastUpTimes:         make(map[keyboard.Key]time.Time),
 	}
@@ -67,7 +77,7 @@ func (m *DurationOfPress) String() string {
 	output := ""
 
 	for key, data := range m.durationOfPressData {
-		output += fmt.Sprintf("%s %d %s\n", key, data.pressCount, data.averageTime)
+		output += fmt.Sprintf("%s %d %s\n", key, data.Count(), time.Duration(data.Mean()))
 	}
 
 	return output + "\n\n"
@@ -83,19 +93,16 @@ func (m *DurationOfPress) handleDownEvent(evt keyboard.ButtonEvent) {
 func (m *DurationOfPress) handleUpEvent(evt keyboard.ButtonEvent) {
 	m.lastUpTimes[evt.Key] = evt.Time()
 
-	// Update the average
-	currData := m.durationOfPressData[evt.Key]
-
-	newAvgDuration := time.Duration(utils.RecomputeAverage(
-		float64(m.lastUpTimes[evt.Key].Sub(m.lastDownTimes[evt.Key])), // newSample
-		float64(currData.averageTime),                                 // oldAvg
-		currData.pressCount,                                           // oldSampleCount
-	))
-
-	m.durationOfPressData[evt.Key] = durationOfPressMetadata{
-		averageTime: newAvgDuration,
-		pressCount:  currData.pressCount + 1,
+	pressDuration := m.lastUpTimes[evt.Key].Sub(m.lastDownTimes[evt.Key])
+	if pressDuration > maxDuration {
+		return
 	}
+
+	if m.durationOfPressData[evt.Key] == nil {
+		m.durationOfPressData[evt.Key] = utils.NewStats()
+	}
+
+	m.durationOfPressData[evt.Key].Add(float64(pressDuration))
 }
 
 func (m *DurationOfPress) processEvent(evt keyboard.ButtonEvent) {
@@ -109,20 +116,36 @@ func (m *DurationOfPress) processEvent(evt keyboard.ButtonEvent) {
 
 // DataForHeatMap outputs one line containing the average press durations
 func (m *DurationOfPress) DataForHeatMap() [][]string {
-	l := []string{}
+	currLine := []string{}
 
 	for _, k := range utils.OrderedKeys {
-		if md, ok := m.durationOfPressData[k]; ok {
-			l = append(l, utils.DurationToMSString(md.averageTime))
-		} else {
-			l = append(l, "0.0")
+		md, ok := m.durationOfPressData[k]
+		if !ok {
+			// Should fill with zero instead of missing value
+			currLine = append(currLine, "0.0")
+			continue
 		}
+
+		// Check if keypress duration has been recorded enough times
+		if md.Count() < minPressCount {
+			currLine = append(currLine, "0.0")
+			continue
+		}
+
+		// Require keypress durations to not be too spread out
+		if md.Std() > float64(maxDurationStd) {
+			currLine = append(currLine, "0.0")
+			continue
+		}
+
+		currLine = append(currLine, utils.DurationToMSString(time.Duration(md.Mean())))
 	}
 
-	return [][]string{l}
+	return [][]string{currLine}
 }
 
 // Data collects our metrics data into a CSV compatible format
+// DEPRECATED: Currently using DataForHeatMap instead
 func (m *DurationOfPress) Data() [][]string {
 	// Convert durationOfPressData to [][]string for the reporter
 	data := [][]string{
@@ -136,7 +159,7 @@ func (m *DurationOfPress) Data() [][]string {
 		if md, ok := m.durationOfPressData[k]; ok {
 			l := []string{
 				k.String(),
-				utils.DurationToMSString(md.averageTime),
+				utils.DurationToMSString(time.Duration(md.Mean())),
 			}
 			data = append(data, l)
 		}
