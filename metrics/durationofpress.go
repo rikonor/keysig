@@ -107,6 +107,21 @@ func (m *DurationOfPress) processEvent(evt keyboard.ButtonEvent) {
 	}
 }
 
+// DataForHeatMap outputs one line containing the average press durations
+func (m *DurationOfPress) DataForHeatMap() [][]string {
+	l := []string{}
+
+	for _, k := range utils.OrderedKeys {
+		if md, ok := m.durationOfPressData[k]; ok {
+			l = append(l, utils.DurationToMSString(md.averageTime))
+		} else {
+			l = append(l, "0.0")
+		}
+	}
+
+	return [][]string{l}
+}
+
 // Data collects our metrics data into a CSV compatible format
 func (m *DurationOfPress) Data() [][]string {
 	// Convert durationOfPressData to [][]string for the reporter
@@ -132,5 +147,5 @@ func (m *DurationOfPress) Data() [][]string {
 
 // WriteToCSV collects our metrics data and writes it to a CSV file
 func (m *DurationOfPress) WriteToCSV() {
-	utils.WriteToCSV("durationOfPress", m.Data())
+	utils.WriteToCSV("durationOfPress", m.DataForHeatMap())
 }
