@@ -3,7 +3,7 @@ package utils
 import "math"
 
 // Stats tracks a sample population and can be used for online calculation
-// of mean, variance and standard deviation Welford's method
+// of mean, variance and standard deviation using Welford's method
 // https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm
 type Stats struct {
 	sampleCount  uint64

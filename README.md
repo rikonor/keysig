@@ -1,7 +1,8 @@
 KeySig
 ---
 
-Extract useful statistics from keyboard events.
+Extract useful statistics from keyboard events, generate unique signatures and detect intruders.  
+See also: [Keylogger](https://github.com/rikonor/keysig/tree/master/keylogger).
 
 Goals
 ---
@@ -24,14 +25,18 @@ Initial Results
 
 Evolution of a _timeToNext_-based signature over the course of 3 hours. Frames were taken every 3 minutes. No filtering was done at this point.
 
-The shade of gray represents the keypress duration relative to the others.
+The shade of gray represents the transition duration relative to the others.
 Black squares indicate either a very fast transition time relative to the other transitions or one that hasn't been encountered yet.
 
 ![timeToNextEvolution](docs/out.gif)
 
+Evolution of a _durationOfPress_-based signature showing average keypress times.
+
+![durationOfPressEvolution](docs/durationOfPress6.gif)
+
 Simple _durationOfPress_ chart showing average values.
 
-![durationOfPress](docs/TimeOfPressReport.png)
+![durationOfPressEvolution](docs/TimeOfPressReport.png)
 
 _timeToNext_-based signatures from two runs of typing the same text (random wikipedia article).
 
@@ -44,9 +49,8 @@ _timeToNext_-based signatures from two runs of typing the same text (random wiki
 References
 ---
 
-* In Linux: https://github.com/MarinX/keylogger
-* In Mac: can't keylog (must be active process with Window atm)
-* OSX Keylogger in C: https://github.com/caseyscarborough/keylogger
+* https://github.com/MarinX/keylogger
+* https://github.com/caseyscarborough/keylogger
 * http://osxbook.com/book/bonus/chapter2/alterkeys/
 * https://github.com/montanaflynn/stats
 * http://www.cs.cmu.edu/~keystroke/

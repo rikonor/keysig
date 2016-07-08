@@ -41,7 +41,4 @@ func (m *Manager) Start() {
 
 	k := NewKeylogger(&eChan)
 	k.Start()
-
-	// rk := NewReplayKeylogger(&eChan, nil)
-	// rk.Start()
 }
